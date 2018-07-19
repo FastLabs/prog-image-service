@@ -13,7 +13,6 @@
         <vertx.version>3.5.3</vertx.version>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>io.vertx</groupId>
