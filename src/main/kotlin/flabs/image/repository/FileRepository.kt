@@ -1,22 +1,41 @@
 package flabs.image.repository
 
+import flabs.image.rest
 import io.vertx.core.Future
 import io.vertx.core.Vertx
 import io.vertx.core.buffer.Buffer
 import io.vertx.core.file.OpenOptions
 import io.vertx.core.streams.Pump
 import io.vertx.core.streams.ReadStream
+import java.awt.Color
+import java.awt.image.BufferedImage
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import javax.imageio.ImageIO
 import kotlin.streams.toList
 
 
 class FileRepository(val location: Path, private val vertx: Vertx) : ImageRepository {
 
+    override fun saveImage(img: BufferedImage, name: String) {
+        val format = name.rest('.')
+        ImageIO.write(img, format, File("$location/$name"))
+    }
+
+    override fun loadImage(name: String): BufferedImage {
+        return ImageIO.read(File("$location/$name"))
+    }
+
+
+    override fun imagePresent(name: String, format: String): Boolean {
+        return vertx.fileSystem().existsBlocking("$location/$name.$format")
+    }
+
 
     override fun getImage(name: String): Future<ReadStream<Buffer>> {
         val resFut = Future.future<ReadStream<Buffer>>()
-        vertx.fileSystem().open("${this.location}/$name", OpenOptions().setRead(true)) { res ->
+        vertx.fileSystem().open("$location/$name", OpenOptions().setRead(true)) { res ->
             if (res.succeeded()) {
                 resFut.complete(res.result())
             } else {
@@ -28,7 +47,7 @@ class FileRepository(val location: Path, private val vertx: Vertx) : ImageReposi
 
     override fun newImage(name: String, readStr: ReadStream<Buffer>) {
         readStr.pause()
-        vertx.fileSystem().open("${this.location}/$name", OpenOptions()) { res ->
+        vertx.fileSystem().open("$location/$name", OpenOptions()) { res ->
             if (res.succeeded()) {
                 val destination = res.result()
                 Pump.pump(readStr, destination).start()
@@ -51,9 +70,8 @@ class FileRepository(val location: Path, private val vertx: Vertx) : ImageReposi
 
     private fun splitFileName(path: Path): Pair<String, String> {
         val name = path.fileName.toString()
-        val sepIndex = name.lastIndexOf('.')
-
-        return Pair(first = name.substring(0, sepIndex), second = name.substring(sepIndex + 1, name.length))
+        val (id, format) = name.split('.')
+        return Pair(first = id, second = format)
     }
 
     override fun listAll(): List<ImageMeta> {

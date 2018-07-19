@@ -1,5 +1,6 @@
 package flabs.image.web
 
+import flabs.image.ImageActions
 import flabs.image.repository.ImageRepository
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
@@ -14,8 +15,8 @@ fun handleHealth(rc: RoutingContext) {
 }
 
 
-class WebVerticle(imgRepo: ImageRepository) : AbstractVerticle() {
-    private val imgRepoHandlers = ImgRepoHttpHandlers(imgRepo)
+class WebVerticle(imgRepo: ImageRepository, actions: ImageActions) : AbstractVerticle() {
+    private val imgRepoHandlers = ImgRepoHttpHandlers(imgRepo, actions )
 
     override fun start(startFuture: Future<Void>?) {
         val httpPort = 2000

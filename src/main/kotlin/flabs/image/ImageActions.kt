@@ -30,8 +30,8 @@ class ImageActions(vertx: Vertx) {
         return actionResult
     }
 
-    fun transpformPngToJpeg(name: String): Future<Boolean> {
-        return genericAction("png->jpg@img-worker", JsonObject().put("imgName", name))
+    fun transformPngToJpeg(name: String): Future<Boolean> {
+        return genericAction("png->jpg@img-worker", JsonObject().put("name", name))
     }
 
 }

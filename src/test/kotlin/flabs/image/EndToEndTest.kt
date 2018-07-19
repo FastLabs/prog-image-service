@@ -57,8 +57,9 @@ class EndToEndTest : AsyncTest() {
         val async = tc.async()
         val vertx = rule.vertx()
         val webClient = WebClient.create(vertx)
+        val actions = ImageActions(vertx)
 
-        val web = WebVerticle(imgRepo!!)
+        val web = WebVerticle(imgRepo!!, actions)
 
         vertx.deployVerticle(web) {
             imgRepo!!.getImage("Superhero.png").setHandler { res ->
